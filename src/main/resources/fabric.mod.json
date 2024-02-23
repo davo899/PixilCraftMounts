@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "pixilcraftmounts",
+  "version": "${version}",
+  "name": "PixilCraftMounts",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {},
+  "depends": {
+    "fabricloader": ">=0.14.23",
+    "fabric": "*",
+    "minecraft": "1.20.1"
+  }
+}
+
