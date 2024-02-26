@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.selfdot.pixilcraftmounts.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "EntityMixin",
+    "LivingEntityMixin",
+    "MobEntityMixin",
+    "PokemonEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

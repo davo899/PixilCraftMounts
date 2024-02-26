@@ -1,18 +1,25 @@
 {
   "schemaVersion": 1,
   "id": "pixilcraftmounts",
-  "version": "${version}",
+  "version": "0",
   "name": "PixilCraftMounts",
   "description": "",
   "authors": [],
   "contact": {},
   "license": "All-Rights-Reserved",
   "environment": "*",
-  "entrypoints": {},
+  "entrypoints": {
+    "main": [
+      "com.selfdot.pixilcraftmounts.PixilCraftMountsMod"
+    ]
+  },
   "depends": {
     "fabricloader": ">=0.14.23",
     "fabric": "*",
     "minecraft": "1.20.1"
-  }
+  },
+  "mixins": [
+    "pixilcraftmounts.mixins.json"
+  ]
 }
 
