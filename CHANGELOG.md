@@ -1,3 +1,7 @@
+# 0.3.0
+
+- Made flying and dragon type mounts able to fly.
+
 # 0.2.0
 
 - Land mounts can now jump the same way as a horse.
