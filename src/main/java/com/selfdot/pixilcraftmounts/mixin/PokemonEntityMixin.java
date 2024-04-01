@@ -1,18 +1,15 @@
 package com.selfdot.pixilcraftmounts.mixin;
 
-import com.cobblemon.mod.common.api.pokemon.stats.Stats;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.selfdot.pixilcraftmounts.imixin.IPokemonEntityMixin;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.JumpingMount;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,13 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = PokemonEntity.class)
-public abstract class PokemonEntityMixin extends MobEntityMixin implements IPokemonEntityMixin {
-
-    @Shadow
-    private Pokemon pokemon;
+public abstract class PokemonEntityMixin extends MobEntityMixin implements IPokemonEntityMixin, JumpingMount {
 
     @Unique
     private boolean isMount = false;
+    @Unique
+    private float jumpStrength = 0F;
 
     @Unique
     public void pixilCraftMounts$setIsMount(boolean isMount) {
@@ -62,9 +58,12 @@ public abstract class PokemonEntityMixin extends MobEntityMixin implements IPoke
 
     @Override
     protected void injectTickControlled(PlayerEntity playerEntity, Vec3d vec3d, CallbackInfo ci) {
-        Vec2f vec2f = new Vec2f(playerEntity.getPitch() * 0.5F, playerEntity.getYaw());
-        this.setRotation(vec2f.y, vec2f.x);
-        this.prevYaw = this.bodyYaw = this.headYaw = this.getYaw();
+        setRotation(playerEntity.getYaw(), playerEntity.getPitch() * 0.5F);
+        this.prevYaw = this.bodyYaw = this.headYaw = getYaw();
+        if (isLogicalSideForUpdatingMovement() && isOnGround()) {
+            if (jumpStrength > 0F) jump(jumpStrength, vec3d);
+            jumpStrength = 0F;
+        }
     }
 
     @Override
@@ -77,7 +76,7 @@ public abstract class PokemonEntityMixin extends MobEntityMixin implements IPoke
     @Override
     protected void injectGetMovementSpeed(CallbackInfoReturnable<Float> cir) {
         if (getWorld().isClient && isLogicalSideForUpdatingMovement()) {
-            cir.setReturnValue((3 + (25 * (pokemon.getStat(Stats.SPEED) / 500f))) / 40f);
+            cir.setReturnValue(10 / 40f);
         }
     }
 
@@ -90,5 +89,37 @@ public abstract class PokemonEntityMixin extends MobEntityMixin implements IPoke
     protected void injectSaveNbt(NbtCompound nbtCompound, CallbackInfoReturnable<Boolean> cir) {
         cir.cancel();
     }
+
+    @Unique
+    protected void jump(float f, Vec3d vec3d) {
+        double d = jumpStrength * (double)f * (double)getJumpVelocityMultiplier();
+        double e = d + (double)getJumpBoostVelocityModifier();
+        Vec3d vec3d2 = this.getVelocity();
+        this.setVelocity(vec3d2.x, e, vec3d2.z);
+        this.velocityDirty = true;
+        if (vec3d.z > 0.0) {
+            float g = MathHelper.sin(this.getYaw() * 0.017453292F);
+            float h = MathHelper.cos(this.getYaw() * 0.017453292F);
+            this.setVelocity(this.getVelocity().add(-0.4F * g * f, 0.0, 0.4F * h * f));
+        }
+
+    }
+
+    @Override
+    public void setJumpStrength(int i) {
+        if (i < 0) i = 0;
+        jumpStrength = i >= 90 ? 1.0f : 0.4f + 0.4f * (float)i / 90.0f;
+    }
+
+    @Override
+    public boolean canJump() {
+        return true;
+    }
+
+    @Override
+    public void startJumping(int i) { }
+
+    @Override
+    public void stopJumping() { }
 
 }

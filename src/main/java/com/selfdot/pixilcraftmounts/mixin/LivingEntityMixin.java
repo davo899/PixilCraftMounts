@@ -15,6 +15,7 @@ public abstract class LivingEntityMixin extends EntityMixin {
 
     @Shadow public float headYaw;
     @Shadow public float bodyYaw;
+    @Shadow public abstract float getJumpBoostVelocityModifier();
 
     @Inject(method = "getControlledMovementInput", at = @At("HEAD"), cancellable = true)
     protected void injectGetControlledMovementInput(
